@@ -127,8 +127,15 @@ export function createTabHandlers(api: BrowserApi): TabHandlers {
       await getTab(api, tab_id);
       try {
         await (direction === 'back' ? api.tabs.goBack(tab_id) : api.tabs.goForward(tab_id));
-      } catch {
-        throw new ProtocolError('not_found', `tab ${tab_id} has no page to go ${direction} to`);
+      } catch (error) {
+        const reason = error instanceof Error ? error.message : String(error);
+        if (/next page in history/i.test(reason)) {
+          throw new ProtocolError(
+            'not_found',
+            `tab ${tab_id} has no page to go ${direction} to (Chrome: ${reason})`,
+          );
+        }
+        throw new ProtocolError('internal', `tab ${tab_id} could not go ${direction}: ${reason}`);
       }
       return {};
     },

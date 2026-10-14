@@ -2,6 +2,14 @@
 
 This project follows Semantic Versioning. Dates are ISO 8601.
 
+## Unreleased
+
+### Fixed
+
+- `tabs.history` no longer hides why going back or forward failed. The end of the history is
+  still `not_found`, now with Chrome's message, and any other failure is `internal` with
+  Chrome's message instead of a misleading `not_found`.
+
 ## 0.1.0 - 2026-09-23
 
 The first release. It speaks protocol version 1 with hypruse's `browser-host`.

@@ -134,6 +134,20 @@ describe('tabs.close and tabs.history', () => {
     expect(browser.tab(f2).url).toBe('https://example.com/next');
     await expectCode(handlers['tabs.history']({ tab_id: f2, direction: 'forward' }), 'not_found');
   });
+
+  it("passes Chrome's reason through instead of hiding it", async () => {
+    const { browser, handlers, f2 } = setup();
+    await expect(handlers['tabs.history']({ tab_id: f2, direction: 'back' })).rejects.toThrow(
+      'Cannot find a next page in history',
+    );
+    const api = browser.api();
+    api.tabs.goBack = async () => {
+      throw new Error('Tabs cannot be edited right now (user may be dragging a tab).');
+    };
+    const busy = createTabHandlers(api)['tabs.history']({ tab_id: f2, direction: 'back' });
+    await expectCode(busy, 'internal');
+    await expect(busy).rejects.toThrow('user may be dragging a tab');
+  });
 });
 
 describe('resolveTab', () => {
